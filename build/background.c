@@ -3,31 +3,35 @@
 int main(void){
     const int screenwidth = 700;
     const int screenheight = 400;
-    const float velocity = 2.0f;
+    const float velocity = 1.0f;
     
     bool is_moving = false;
+    bool is_jumping = false;
+    bool on_ground = false;
         
     float posX = 50;
-    float posY = 283;
+    float posY = 250;
 
     InitWindow(screenwidth, screenheight, "Background Scrolling");
     
     Texture2D background = LoadTexture("bg1.png");
     Texture2D midground = LoadTexture("bg2.png");
-    Texture2D foreground = LoadTexture("bg3.png");
+    Texture2D ground = LoadTexture("bg3.png");
     Texture2D player = LoadTexture("cow_sprite_sheet.png");
     Texture2D still_player = LoadTexture("cow.png");
     
     Rectangle still = {0.0f, 0.0f, (float)still_player.width, (float)still_player.height};
     Rectangle frame_rec = {0.0f, 0.0f, (float)player.width/4, (float)player.height};
     
+    Rectangle floor = {0.0f, 0.0f, (float)ground.width, (float)ground.height};
+
     int current_frame = 0;
     int frames_counter = 0;
-    int frame_speed = 8;
+    int frame_speed = 6;
 
     float scrolling_back = 0.0f;
     float scrolling_mid = 0.0f;
-    float scrolling_fore = 0.0f;
+    //float scrolling_fore = 0.0f;
 
     SetTargetFPS(60);
 
@@ -45,14 +49,15 @@ int main(void){
         }
     
 
+        //choose what animations to use for each sprite and make the background scroll
         if(IsKeyDown(KEY_RIGHT)){
             scrolling_back -= 0.1f;
             scrolling_mid -= 0.5f;
-            scrolling_fore -= 2.0f;
+            //scrolling_fore -= 2.0f;
 
             if(scrolling_back <= -background.width*2) scrolling_back = 0;
             if(scrolling_mid <= -midground.width*2) scrolling_mid = 0;
-            if(scrolling_fore <= -foreground.width*2) scrolling_fore = 0;
+            //if(scrolling_fore <= -foreground.width*2) scrolling_fore = 0;
             
             is_moving = true;
 
@@ -63,17 +68,29 @@ int main(void){
 
              scrolling_back += 0.1f;
              scrolling_mid += 0.5f;
-             scrolling_fore += 2.0f;
+             //scrolling_fore += 2.0f;
 
              if(scrolling_back >= background.width*2) scrolling_back = 0;
              if(scrolling_mid >= midground.width*2) scrolling_mid = 0;
-             if(scrolling_fore >= foreground.width*2) scrolling_fore = 0;
+             //if(scrolling_fore >= foreground.width*2) scrolling_fore = 0;
              
              is_moving = true;        
         }
+        else if(IsKeyDown(KEY_SPACE)){
+            posY -= velocity;
+            is_jumping = true;
+        }
         else{
             is_moving = false;
+            is_jumping = false;
         }
+
+        //gravity? I hate Gravity
+        on_ground = CheckCollisionRecs(frame_rec, floor);       
+        //For some reason cow is being read as always colliding with the ground
+        if(!on_ground){
+            posY += velocity;
+        } 
 
         BeginDrawing();
 
@@ -85,8 +102,11 @@ int main(void){
             DrawTextureEx(midground, (Vector2){ scrolling_mid, 20 }, 0.0f, 2.0f, WHITE);
             DrawTextureEx(midground, (Vector2){ midground.width*2 + scrolling_mid, 20 }, 0.0f, 2.0f, WHITE);
 
-            DrawTextureEx(foreground, (Vector2){scrolling_fore, 70}, 0.0f, 2.0f, WHITE);
-            DrawTextureEx(foreground, (Vector2){foreground.width*2 + scrolling_fore, 70}, 0.0f, 2.0f, WHITE);
+            //DrawTextureEx(foreground, (Vector2){scrolling_fore, 70}, 0.0f, 2.0f, WHITE);
+            //DrawTextureEx(foreground, (Vector2){foreground.width*2 + scrolling_fore, 70}, 0.0f, 2.0f, WHITE);
+            
+            DrawTextureRec(ground, floor, (Vector2){0, 375}, WHITE);
+
 
             if(is_moving){
                 DrawTextureRec(player, frame_rec, (Vector2){posX, posY}, WHITE);
@@ -94,12 +114,17 @@ int main(void){
             else{
                 DrawTextureRec(still_player, still, (Vector2){posX, posY}, WHITE);
             }
+
+            //Debug collision issues
+            if(on_ground){
+                DrawText("COLLISION", GetScreenWidth()/2 - MeasureText("COLLISION", 20)/2, GetScreenHeight()/2 -10, 20, BLACK); 
+            }
         EndDrawing();
     }
     
     UnloadTexture(background);
     UnloadTexture(midground);
-    UnloadTexture(foreground);
+    UnloadTexture(ground);
     UnloadTexture(player);
 
     CloseWindow();
