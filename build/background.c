@@ -24,6 +24,8 @@ int main(void){
     Rectangle frame_rec = {0.0f, 0.0f, (float)player.width/4, (float)player.height};
     
     Rectangle floor = {0.0f, 0.0f, (float)ground.width, (float)ground.height};
+    //see the collision
+    Rectangle box_collision = {0};
 
     int current_frame = 0;
     int frames_counter = 0;
@@ -86,12 +88,13 @@ int main(void){
         }
 
         //gravity? I hate Gravity
-        on_ground = CheckCollisionRecs(frame_rec, floor);       
+        on_ground = CheckCollisionRecs(still, floor);       
         //For some reason cow is being read as always colliding with the ground
         if(!on_ground){
             posY += velocity;
         } 
-
+        //Draw collision box
+        if(on_ground) box_collision = GetCollisionRec(still, floor);
         BeginDrawing();
 
             ClearBackground(GetColor(0x052c46ff));
@@ -118,6 +121,8 @@ int main(void){
             //Debug collision issues
             if(on_ground){
                 DrawText("COLLISION", GetScreenWidth()/2 - MeasureText("COLLISION", 20)/2, GetScreenHeight()/2 -10, 20, BLACK); 
+
+                DrawRectangleRec(box_collision, LIME);
             }
         EndDrawing();
     }
