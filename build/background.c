@@ -21,9 +21,9 @@ int main(void){
     Texture2D still_player = LoadTexture("cow.png");
     
     Rectangle still = {0.0f, 0.0f, (float)still_player.width, (float)still_player.height};
-    Rectangle frame_rec = {0.0f, 0.0f, (float)player.width/4, (float)player.height};
-    
-    Rectangle floor = {0.0f, 0.0f, (float)ground.width, (float)ground.height};
+    Rectangle frame_rec = {posX, posY, (float)player.width/4, (float)player.height};
+
+    Rectangle floor = {0.0f, 375.0f, (float)ground.width, (float)ground.height};
     //see the collision
     Rectangle box_collision = {0};
 
@@ -38,6 +38,8 @@ int main(void){
     SetTargetFPS(60);
 
     while(!WindowShouldClose()){
+        
+        Rectangle hitbox = {posX, posY, (float)still_player.width, (float)still_player.height};   
 
         //track frames for sprite animation
         frames_counter++;
@@ -88,13 +90,13 @@ int main(void){
         }
 
         //gravity? I hate Gravity
-        on_ground = CheckCollisionRecs(still, floor);       
+        on_ground = CheckCollisionRecs(frame_rec, floor);       
         //For some reason cow is being read as always colliding with the ground
         if(!on_ground){
             posY += velocity;
         } 
         //Draw collision box
-        if(on_ground) box_collision = GetCollisionRec(still, floor);
+        if(on_ground) box_collision = GetCollisionRec(hitbox, floor);
         BeginDrawing();
 
             ClearBackground(GetColor(0x052c46ff));
@@ -109,7 +111,9 @@ int main(void){
             //DrawTextureEx(foreground, (Vector2){foreground.width*2 + scrolling_fore, 70}, 0.0f, 2.0f, WHITE);
             
             DrawTextureRec(ground, floor, (Vector2){0, 375}, WHITE);
-
+            
+            DrawRectangleRec(floor, GOLD);
+            DrawRectangle(posX, posY, still_player.width, still_player.height, RED);
 
             if(is_moving){
                 DrawTextureRec(player, frame_rec, (Vector2){posX, posY}, WHITE);
