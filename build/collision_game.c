@@ -26,6 +26,30 @@ typedef struct EnvItem{
     Color color; 
 } EnvItem;
 
+int CheckCollisionSide(Player *player, EnvItem *env_items, int env_items_length){
+    //Player collision
+    bool collision = false;
+    Rectangle player_rec = {player->position.x, player->position.y, player->height, player->width};
+    for(int i = 0; i < env_items_length; i++){
+        EnvItem obstacle = env_items[i];
+        collision = CheckCollisionRecs(obstacle.rect, player_rec);
+        collision_box = GetCollisionRec(obstacle.rect, player_rec);
+       
+        if(player->position.x <= obstacle.rect.x + obstacle.rect.width && player->position.x > obstacle.rect.x){
+            //left
+            return 8;
+        }
+        if(player->position.x + player->width >= obstacle.rect.x && player->position.x + player->width <= obstacle.rect.x + obstacle.rect.width){
+            //right
+            return 4;
+        }
+        if(obstacle.rect.y <= player->position.y + player->height && player->position.y + player->height <= obstacle.rect.y + obstacle.rect.height){
+            //bottom
+            return 2;
+        }
+    }
+}
+
 //Function Declarations
 void UpdatePlayer(Player *player, EnvItem *env_items, int env_items_length, float delta);
 
@@ -54,53 +78,27 @@ void UpdatePlayer(Player *player, EnvItem *env_items, int env_items_length, floa
         player->velocity -= .2;
     }
     //Player collision
-/*    bool collision = false;
+    bool collision = false;
+    int collision_position = 0;
 
     for(int i = 0; i < env_items_length; i++){
         EnvItem obstacle = env_items[i];
         collision = CheckCollisionRecs(obstacle.rect, player_rec);
-        collision_box = GetCollisionRec(obstacle.rect, player_rec);
         if(!collision){
             player->can_jump = false;
         }
         else{
+            collision_position = CheckCollisionSide(player, env_items, env_items_length);
+            collision_box = GetCollisionRec(obstacle.rect, player_rec);
+            printf("%d", collision_position);
             player->can_jump = true;
-            if(obstacle.rect.x > player_rec.x){
-                player->can_move_right = false;
-            }
-            if(obstacle.rect.x < player_rec.x){
-                player->can_move_left = false;
-            }
        }
     }
-    if(!collision){
+    if(collision_position != 8){
         player->position.y += GRAVITY;
-    }*/   
+    }  
 } 
 
-int CheckCollisionSide(Player *player, EnvItem *env_items, int env_items_length){
-    //Player collision
-    bool collision = false;
-    Rectangle player_rec = {player->position.x, player->position.y, player->height, player->width};
-    for(int i = 0; i < env_items_length; i++){
-        EnvItem obstacle = env_items[i];
-        collision = CheckCollisionRecs(obstacle.rect, player_rec);
-        collision_box = GetCollisionRec(obstacle.rect, player_rec);
-       
-        if(player->position.x <= obstacle.rect.x + obstacle.rect.width && player->position.x > obstacle.rect.x){
-            //left
-            return 8;
-        }
-        if(player->position.x + player->width >= obstacle.rect.x && player->position.x + player->width <= obstacle.rect.x + obstacle.rect.width){
-            //right
-            return 4;
-        }
-        if(obstacle.rect.y <= player->position.y + player->height && player->position.y + player->height <= obstacle.rect.y + obstacle.rect.height){
-            //bottom
-            return 2;
-        }
-    }
-}
 
 int main(void){
     //Set screen parameters
