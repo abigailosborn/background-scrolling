@@ -5,6 +5,11 @@
 #define PLAYER_JUMP_SPEED 10.0f
 #define PLAYER_HOR_SPEED 60.0f
 
+bool left_col = false;
+bool right_col = false;
+bool top_col = false;
+bool bottom_col = false;
+
 Rectangle collision_box = {0};
 
 //Set characteristics for the player
@@ -26,7 +31,13 @@ typedef struct EnvItem{
     Color color; 
 } EnvItem;
 
-int CheckCollisionSide(Player *player, EnvItem *env_items, int env_items_length){
+void ResetCollision(bool *left_col, bool *right_col, bool *top_col, bool *bottom_col){
+    left_col = false;
+    right_col = false;
+    top_col = false;
+    bottom_col = false;
+}
+void CheckCollisionSide(Player *player, EnvItem *env_items, int env_items_length){
     //Player collision
     bool collision = false;
     Rectangle player_rec = {player->position.x, player->position.y, player->height, player->width};
@@ -36,17 +47,24 @@ int CheckCollisionSide(Player *player, EnvItem *env_items, int env_items_length)
         collision_box = GetCollisionRec(obstacle.rect, player_rec);
        
         if(player->position.x <= obstacle.rect.x + obstacle.rect.width && player->position.x > obstacle.rect.x){
+            if(player->position.y + player->height < obstacle.rect.y && player->position.y < obstacle.rect.y + obstacle.rect.height){
             //left
-            return 8;
+                left_col = true;
+            }
         }
         if(player->position.x + player->width >= obstacle.rect.x && player->position.x + player->width <= obstacle.rect.x + obstacle.rect.width){
             //right
-            return 4;
+            if(player->position.y + player->height < obstacle.rect.y && player->position.y < obstacle.rect.y + obstacle.rect.height){
+                right_col = true;;
+//            }
         }
         if(obstacle.rect.y <= player->position.y + player->height && player->position.y + player->height <= obstacle.rect.y + obstacle.rect.height){
-            //bottom
-            return 2;
+            //if(player->position.x + player->width < obstacle.rect.x && player->position.y < obstacle.rect.x + obstacle.rect.height){
+                //bottom
+                bottom_col = true;
+            }
         }
+        ResetCollision(&left_col, &right_col, &top_col, &bottom_col);
     }
 }
 
@@ -88,14 +106,17 @@ void UpdatePlayer(Player *player, EnvItem *env_items, int env_items_length, floa
             player->can_jump = false;
         }
         else{
-            collision_position = CheckCollisionSide(player, env_items, env_items_length);
+            CheckCollisionSide(player, env_items, env_items_length);
             collision_box = GetCollisionRec(obstacle.rect, player_rec);
             printf("%d", collision_position);
             player->can_jump = true;
        }
     }
-    if(collision_position != 8){
+    if(bottom_col == false){
         player->position.y += GRAVITY;
+    }
+    if(left_col == true){
+
     }  
 } 
 
@@ -119,7 +140,8 @@ int main(void){
     //Set up environment items
     EnvItem env_items[] = {
         {{0, 400, 800, 50}, 1, GREEN},
-        {{0, 200, 40, 200}, 1, GREEN}
+        {{0, 200, 40, 200}, 1, GREEN},
+        {{400, 200, 40, 200}, 1, GREEN}
     };
 
     //Find the amount of environment items
